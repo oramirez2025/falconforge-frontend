@@ -61,9 +61,9 @@ export default function ProfileCard({ user, profilePicUrl, onProfilePicChange, i
     if (profilePicUrl.startsWith('http')) {
       return profilePicUrl;
     }
-
+    const baseUrl = import.meta.env.VITE_BACKEND_URL
     // If it's a relative path, prepend the backend URL
-    return `http://127.0.0.1:8000${profilePicUrl}`;
+    return `${baseUrl}${profilePicUrl}`;
   };
 
   const imageUrl = getImageUrl();
