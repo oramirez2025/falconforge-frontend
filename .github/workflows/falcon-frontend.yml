@@ -44,6 +44,6 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }} # <--- ADDED THIS LINE
         run: |
           # Build the Docker image, passing the REACT_APP_BACKEND_URL as a build argument
-          docker buildx build --platform linux/amd64 --build-arg REACT_APP_BACKEND_URL="${REACT_APP_BACKEND_URL}" -t "${AWS_ACCOUNT_ID}".dkr.ecr."${AWS_REGION}".amazonaws.com/my-frontend-app:latest --no-cache --force-rm --push .
+          docker buildx build --platform linux/amd64 --build-arg REACT_APP_BACKEND_URL="${REACT_APP_BACKEND_URL}" -t "${AWS_ACCOUNT_ID}".dkr.ecr."${AWS_REGION}".amazonaws.com/falconforge-frontend:latest --no-cache --force-rm --push .
 
           echo "Frontend image pushed to ECR: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
