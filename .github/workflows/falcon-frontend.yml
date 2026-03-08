@@ -9,7 +9,7 @@ on:
 env:
   # Environment variables for AWS and ECR
   # AWS_REGION is now passed directly to the configure-aws-credentials action
-  ECR_REPOSITORY: falconforge-frontend # Name of your ECR repository
+  ECR_REPOSITORY: falconforge-frontend # Name of your ECR repository 
 
 jobs:
   build-and-push:
