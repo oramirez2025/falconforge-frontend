@@ -1,51 +1,74 @@
-import {useState} from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Box, Container, VStack, HStack, Text, Button } from "@chakra-ui/react";
-import { ScrollText, Feather, MessageCircle } from "lucide-react";
+import { ScrollText, Beer, Feather, MessageCircle } from "lucide-react";
 import Particles from "../components/forum/Particles";
 import Breadcrumb from "../components/forum/Breadcrumb";
-import ForumEventBanner from "../components/cards/ForumEventBanner";
 import CommentCard from "../components/forum/CommentCard";
 import CreateCommentModal from "../components/modals/CreateCommentModal";
 import ReplyCommentModal from "../components/modals/ReplyCommentModal";
 import EditCommentModal from "../components/modals/EditCommentModal";
 import DeleteCommentModal from "../components/modals/DeleteCommentModal";
-import { useOutletContext } from "react-router-dom";
 import { MotionBox } from "../components/Motion";
-import { staggerContainer, staggerItem } from "../components/animations/fffAnimations";
+import { useOutletContext } from "react-router-dom";
+import { staggerContainer, staggerItem, fadeInUp } from "../components/animations/fffAnimations";
+import { useEventComments } from "../components/forum/ForumHelpers";
 
-import { useEventComments, useEvent}  from "../components/forum/ForumHelpers"
-
+// Sample general discussion comments
+// const tavernComments = [] 
+// const tavernComments = [
+//   {
+//     id: 101,
+//     author: "DungeonMaster_Mike",
+//     authorId: 101,
+//     isAdmin: true,
+//     time: "1 day ago",
+//     text: "Welcome to The Tavern! This is the place for general questions, announcements, and chatting with fellow FalCON attendees. Feel free to introduce yourself!",
+//     likes: [102, 103, 104, 105],
+//     replies: [],
+//   },
+//   {
+//     id: 102,
+//     author: "NewAdventurer_Sam",
+//     authorId: 110,
+//     isAdmin: false,
+//     time: "12 hours ago",
+//     text: "Hey everyone! First time at FalCON and super excited. Anyone else coming from the NYC area? Maybe we can carpool!",
+//     likes: [101, 103],
+//     replies: [
+//       {
+//         id: 103,
+//         author: "VeteranPaladin",
+//         authorId: 105,
+//         isAdmin: false,
+//         time: "10 hours ago",
+//         text: "Welcome! I'm actually driving up from Jersey. DM me if you want to coordinate!",
+//         likes: [110],
+//         replies: [],
+//       },
+//     ],
+//   },
+// ];
 
 /**
- * Event Forum Page
- * Shows event info banner and comment thread
+ * The Tavern - General Discussion Page
  */
-export default function EventForumPage() {
-  const { eventId } = useParams();
+export default function TavernPage() {
+  const { year } = useParams();
 
-  // Get event data
-  const event = useEvent(eventId);
+  const {comments, create, reply, edit, like, remove} = useEventComments(null, year)
 
+  
   // Modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showReplyModal, setShowReplyModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-  // Selected comment for actions
   const [selectedComment, setSelectedComment] = useState(null);
-
+  
   const { user } = useOutletContext();
   const currentUserId = user?.id;
 
-
-  const {comments, create, reply, edit, like, remove} = useEventComments(eventId, null)
-
-
-  // ======================
-  // Comment handlers
-  // ======================
   const handleReply = (comment) => {
     setSelectedComment(comment);
     setShowReplyModal(true);
@@ -61,21 +84,8 @@ export default function EventForumPage() {
     setShowDeleteModal(true);
   };
 
-  if (!event) {
-    return (
-      <Box minH="100vh" bg="forge.stone.900" py={20}>
-        <Container maxW="container.lg">
-          <Text color="forge.tan.100" textAlign="center">
-            Event not found
-          </Text>
-        </Container>
-      </Box>
-    );
-  }
-  const year = new Date(event.day).getFullYear()
   return (
     <Box minH="100vh" bg="forge.stone.900" position="relative">
-      {/* Floating Particles */}
       <Particles count={25} />
 
       <Container maxW="container.lg" py={10} position="relative" zIndex={1}>
@@ -84,36 +94,70 @@ export default function EventForumPage() {
           items={[
             { label: "Quest Board", to: "/forum", icon: ScrollText },
             { label: `FalCON ${year}`, to: `/forum/convention/${year}` },
-            { label: event.title },
+            { label: "The Tavern" },
           ]}
         />
 
-        {/* Event Banner */}
-        <ForumEventBanner
-          title={event.title}
-          day={event.day}
-          start_time={event.start_time}
-          end_time={event.end_time}
-          location={event.location}
-          description={event.description}
-        />
+        {/* Tavern Header */}
+        <MotionBox {...fadeInUp} mb={8}>
+          <Box
+            bg="linear-gradient(135deg, #4a1111 0%, #0d0a08 100%)"
+            border="2px solid"
+            borderColor="forge.red.700"
+            borderRadius="xl"
+            p={7}
+            position="relative"
+            overflow="hidden"
+          >
+            {/* Top Accent */}
+            <Box
+              position="absolute"
+              top={0}
+              left={0}
+              right={0}
+              h="3px"
+              bg="linear-gradient(90deg, #f59e0b, #ff6b35, #f59e0b)"
+            />
+
+            <HStack gap={5}>
+              <Box
+                w={16}
+                h={16}
+                bg="forge.red.700"
+                borderRadius="xl"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                color="forge.gold.400"
+              >
+                <Beer size={32} />
+              </Box>
+
+              <VStack align="start" gap={1}>
+                <Text
+                  fontFamily="heading"
+                  fontSize="2xl"
+                  color="forge.tan.100"
+                >
+                  The Tavern
+                </Text>
+                <Text color="forge.tan.400" fontSize="sm">
+                  General discussion, questions & announcements for FalCON {year}
+                </Text>
+              </VStack>
+            </HStack>
+          </Box>
+        </MotionBox>
 
         {/* Comments Section Header */}
         <HStack justify="space-between" mb={6}>
           <HStack gap={2}>
             <MessageCircle size={20} color="var(--chakra-colors-forge-gold-400)" />
-            <Text
-              fontFamily="heading"
-              fontSize="lg"
-              color="forge.tan.100"
-            >
-              Discussion
+            <Text fontFamily="heading" fontSize="lg" color="forge.tan.100">
+              Discussions
             </Text>
-            <Text
-              fontSize="sm"
-              color="forge.tan.500"
-            >
-              ({comments.length} discussions)
+            <Text fontSize="sm" color="forge.tan.500">
+              ({comments.length})
             </Text>
           </HStack>
 
@@ -133,12 +177,12 @@ export default function EventForumPage() {
           >
             <HStack gap={2}>
               <Feather size={14} />
-              <Text>Add Comment</Text>
+              <Text>Start Discussion</Text>
             </HStack>
           </Button>
         </HStack>
 
-        {/* Comments List */}
+        {/* Comments */}
         <MotionBox
           variants={staggerContainer}
           initial="hidden"
@@ -159,30 +203,6 @@ export default function EventForumPage() {
             ))}
           </VStack>
         </MotionBox>
-
-        {/* Empty State */}
-        {comments.length === 0 && (
-          <Box
-            bg="forge.stone.800"
-            border="1px solid"
-            borderColor="forge.stone.700"
-            borderRadius="lg"
-            py={12}
-            textAlign="center"
-          >
-            <MessageCircle 
-              size={48} 
-              color="var(--chakra-colors-forge-stone-600)" 
-              style={{ margin: "0 auto 16px" }}
-            />
-            <Text color="forge.tan.400" mb={2}>
-              No comments yet
-            </Text>
-            <Text color="forge.tan.500" fontSize="sm">
-              Be the first to share your thoughts!
-            </Text>
-          </Box>
-        )}
       </Container>
 
       {/* Modals */}

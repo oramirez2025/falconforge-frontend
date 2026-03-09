@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_URL,
+  baseURL: "http://127.0.0.1:8000/",
 });
 
 export const userLogIn = async (email, password) => {
@@ -93,7 +93,7 @@ export const reserveTickets = async (orderId) => {
   return response.data
 }
 
-// ============= WEATHER =============
+// ============= PAYMENTS =============
 
 export const grabWeather = async () => {
   try {
@@ -136,7 +136,6 @@ export const createEvents = async (setEvents, data) => {
   }
   catch (e) {
     console.error(e)
-    throw e
   }
 }
 
@@ -199,18 +198,81 @@ export const uploadProfilePicture = async (file) => {
   }
 };
 
-// ============= COMMENTS =============
-
-export const fetchCommentThread = async (commentId) => {
+export const updateUserProfile = async (profileData) => {
   try {
-    const response = await api.get(`comment/single/${commentId}/`)
-    return response.data 
-  } 
-  catch (e) {
-    console.error(e)
+    const response = await api.patch("user/account/", profileData);
+    return response.data;
+  } catch (err) {
+    console.error("Failed to update profile:", err);
+    throw err;
   }
-}
+};
 
+// ============= EVENT WISHLIST =============
+
+export const addToWishlist = async (eventId) => {
+  try {
+    const response = await api.post("event/watchlist/", { event_id: eventId });
+    return response.data;
+  } catch (err) {
+    console.error("Failed to add to wishlist:", err);
+    throw err;
+  }
+};
+
+export const removeFromWishlist = async (eventId) => {
+  try {
+    await api.delete(`event/watchlist/${eventId}/`);
+    return { success: true };
+  } catch (err) {
+    console.error("Failed to remove from wishlist:", err);
+    throw err;
+  }
+};
+
+// ============= ADMIN MANAGEMENT =============
+
+export const promoteUser = async (email) => {
+  try {
+    const response = await api.post("user/admin-stat/", {
+      email: email,
+      action: "promote"
+    });
+    return response.data;
+  } catch (err) {
+    console.error("Failed to promote user:", err);
+    throw err;
+  }
+};
+
+export const demoteUser = async (email) => {
+  try {
+    const response = await api.post("user/admin-stat/", {
+      email: email,
+      action: "demote"
+    });
+    return response.data;
+  } catch (err) {
+    console.error("Failed to demote user:", err);
+    throw err;
+  }
+};
+
+export const searchUsers = async (query = '') => {
+  try {
+    const response = await api.get("user/search/", {
+      params: { q: query }
+    });
+    return response.data;
+  } catch (err) {
+    console.error("Failed to search users:", err);
+    throw err;
+  }
+};
+
+
+
+// ================ COMMENTS ==================
 export const fetchComments = async (setComments, event) => {
   try {
     const response = await api.get(`comment/events/${event}/`)
@@ -221,8 +283,20 @@ export const fetchComments = async (setComments, event) => {
   }
 }
 
+export const fetchGeneralComments = async (setComments, year) => {
+  try {
+    const response = await api.get(`comment/general/${year}/`)
+    console.log(response)
+    setComments(response.data)
+  }
+  catch(e) {
+    console.error(e)
+  }
+}
+
 export const createComments = async (eventId, data) => {
   try {
+    console.log(eventId, data)
     const response = await api.post(`comment/events/${eventId}/`, data);
     return response.data;
   } catch (e) {
@@ -230,6 +304,16 @@ export const createComments = async (eventId, data) => {
     return null;
   }
 };
+
+export const createGeneralComment = async (year, data) => {
+  try {
+    const response = await api.post(`comment/general/${year}/`, data);
+    return response.data;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+}
 
 
 export const deleteRecursive = (comments, id) => {
@@ -242,14 +326,14 @@ export const deleteRecursive = (comments, id) => {
 };
 
 
-export const deleteComment = async (_setComments, id) => {
+export const deleteComment = async (id) => {
   try {
     await api.delete(`comment/${id}/`);
   } catch (e) {
     console.error(e);
   }
 }
-export const updateComment = async (_setComments, _event, id, data) => {
+export const updateComment = async (id, data) => {
   try {
     const response = await api.put(`comment/${id}/`, data);
     return response.data; 
